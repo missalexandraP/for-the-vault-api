@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    container_name: the-vault-api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./the_vault.db:/app/the_vault.db
+      - ./.env:/app/.env:ro
+    environment:
+      - DATABASE_URL=sqlite:///./the_vault.db
+      - APP_NAME=The Vault
+      - DEBUG=false
+      - CORS_ORIGINS=*
+    restart: unless-stopped
+
+  # Uncomment for PostgreSQL in production:
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: the-vault-db
+  #   environment:
+  #     POSTGRES_USER: vault
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD}
+  #     POSTGRES_DB: the_vault
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   restart: unless-stopped
+
+# volumes:
+#   pgdata:
