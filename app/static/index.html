@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Vault</title>
+  <style>
+    /* Reset & Base */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-weight: 300;
+      color: #F5F0E8;
+      background: #1A1A1A;
+      overflow-x: hidden;
+    }
+
+    /* Hero / Background */
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-bg {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, #1A1A1A 0%, #2A2420 30%, #1A1A1A 60%, #2A2420 100%);
+      background-size: 400% 400%;
+      animation: slowDrift 12s ease infinite;
+    }
+
+    @keyframes slowDrift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .hero-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(180deg, transparent 0%, rgba(26,26,26,0.4) 60%, rgba(26,26,26,0.9) 100%);
+    }
+
+    /* Gold accent line */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%; transform: translateX(-50%);
+      width: 1px;
+      height: 80px;
+      background: linear-gradient(180deg, transparent, #C9A84C, transparent);
+      opacity: 0.6;
+    }
+
+    /* Wordmark */
+    .wordmark {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      letter-spacing: 12px;
+      text-transform: uppercase;
+      font-family: Didot, 'Bodoni MT', 'Playfair Display', serif;
+      font-weight: 400;
+      font-size: 28px;
+      color: #F5F0E8;
+      opacity: 0.9;
+    }
+    .wordmark span { letter-spacing: 14px; }
+
+    /* Inquire link */
+    .inquire-link {
+      position: absolute;
+      bottom: 40px;
+      right: 40px;
+      z-index: 2;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(245,240,232,0.5);
+      text-decoration: none;
+      transition: all 0.6s ease;
+      cursor: pointer;
+    }
+    .inquire-link:hover { color: #C9A84C; }
+
+    /* Scroll-down section */
+    .scroll-section {
+      position: relative;
+      min-height: 100vh;
+      background: #1A1A1A;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px;
+      text-align: center;
+    }
+
+    .scroll-section::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%; transform: translateX(-50%);
+      width: 1px;
+      height: 60px;
+      background: linear-gradient(180deg, transparent, rgba(201,168,76,0.3), transparent);
+    }
+
+    .tagline {
+      font-family: Didot, 'Bodoni MT', 'Playfair Display', serif;
+      font-weight: 400;
+      font-size: 28px;
+      line-height: 1.5;
+      color: #F5F0E8;
+      margin-bottom: 48px;
+      max-width: 600px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 1.2s ease 0.3s forwards;
+    }
+
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .cta-button {
+      display: inline-block;
+      padding: 14px 48px;
+      background: #1A1A1A;
+      border: 1px solid #C9A84C;
+      color: #C9A84C;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-weight: 300;
+      font-size: 12px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.6s ease;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 1.2s ease 0.6s forwards;
+    }
+    .cta-button:hover {
+      background: #2A2A2A;
+      color: #F5F0E8;
+    }
+
+    /* Queue counter */
+    .queue-counter {
+      margin-top: 24px;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: rgba(245,240,232,0.4);
+      opacity: 0;
+      animation: fadeInUp 1.2s ease 0.9s forwards;
+      display: none;
+    }
+    .queue-counter.visible { display: block; }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(26,26,26,0.85);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal-card {
+      background: #F5F0E8;
+      color: #1A1A1A;
+      max-width: 420px;
+      width: 100%;
+      padding: 48px 40px 40px;
+      position: relative;
+      animation: modalIn 0.6s ease;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: #1A1A1A;
+      cursor: pointer;
+      opacity: 0.3;
+      transition: opacity 0.3s ease;
+    }
+    .modal-close:hover { opacity: 0.7; }
+
+    .modal-card h2 {
+      font-family: Didot, 'Bodoni MT', 'Playfair Display', serif;
+      font-weight: 400;
+      font-size: 20px;
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+      color: #1A1A1A;
+    }
+
+    .modal-card .modal-sub {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #707070;
+      margin-bottom: 32px;
+      text-transform: uppercase;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #707070;
+      margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #D4D0C8;
+      padding: 8px 0 6px;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-weight: 300;
+      font-size: 14px;
+      color: #1A1A1A;
+      outline: none;
+      transition: border-color 0.6s ease;
+    }
+
+    .form-group textarea {
+      min-height: 40px;
+      resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-bottom-color: #C9A84C;
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: #B0ACA5;
+      font-size: 13px;
+    }
+
+    .form-group select {
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      color: #707070;
+    }
+    .form-group select:valid { color: #1A1A1A; }
+
+    .form-submit {
+      width: 100%;
+      padding: 14px;
+      background: #1A1A1A;
+      border: none;
+      color: #C9A84C;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-weight: 300;
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.6s ease;
+      margin-top: 8px;
+    }
+    .form-submit:hover { background: #2A2A2A; color: #F5F0E8; }
+
+    /* Thank-you state */
+    .thank-you {
+      display: none;
+      text-align: center;
+      padding: 40px 0;
+    }
+    .thank-you.active { display: block; }
+    .form-fields { display: block; }
+    .form-fields.hidden { display: none; }
+
+    .thank-you p {
+      font-family: Didot, 'Bodoni MT', 'Playfair Display', serif;
+      font-weight: 400;
+      font-size: 22px;
+      color: #1A1A1A;
+      margin-bottom: 8px;
+    }
+    .thank-you .sub {
+      font-size: 12px;
+      color: #707070;
+      letter-spacing: 1px;
+    }
+
+    /* Footer */
+    .page-footer {
+      padding: 40px 24px;
+      text-align: center;
+      background: #1A1A1A;
+    }
+
+    .page-footer .wordmark {
+      font-size: 14px;
+      letter-spacing: 8px;
+      margin-bottom: 20px;
+    }
+    .page-footer .wordmark span { letter-spacing: 10px; }
+
+    .page-footer a {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: rgba(245,240,232,0.4);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .page-footer a:hover { color: #C9A84C; }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .wordmark { font-size: 20px; letter-spacing: 8px; }
+      .wordmark span { letter-spacing: 10px; }
+      .tagline { font-size: 22px; padding: 0 16px; }
+      .modal-card { padding: 36px 24px 32px; }
+      .inquire-link { right: 24px; bottom: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <section class="hero" id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="wordmark">T H E &nbsp; V A U L T</div>
+    <a class="inquire-link" id="inquireLink" onclick="openModal()">Inquire</a>
+  </section>
+
+  <!-- Scroll Section -->
+  <section class="scroll-section" id="scrollSection">
+    <p class="tagline">&ldquo;Extraordinary things arrive to those who wait.&rdquo;</p>
+    <button class="cta-button" onclick="openModal()">Join The Waitlist</button>
+    <div class="queue-counter" id="queueCounter"></div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="page-footer">
+    <div class="wordmark"><span>T H E &nbsp; V A U L T</span></div>
+    <a href="#" target="_blank" rel="noopener">Follow us on Instagram</a>
+  </footer>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal()">&#10005;</button>
+
+      <!-- Form -->
+      <div class="form-fields" id="formFields">
+        <h2>Access the extraordinary</h2>
+        <p class="modal-sub">Request an invitation</p>
+
+        <form id="waitlistForm" onsubmit="submitForm(event)">
+          <div class="form-group">
+            <label for="fullName">Full name</label>
+            <input type="text" id="fullName" name="fullName" required placeholder="e.g., Alexandra Perez" />
+          </div>
+          <div class="form-group">
+            <label for="email">Email address</label>
+            <input type="email" id="email" name="email" required placeholder="alexandra@example.com" />
+          </div>
+          <div class="form-group">
+            <label for="piece">Which piece are you searching for?</label>
+            <textarea id="piece" name="piece" placeholder="e.g., Herm&egrave;s Birkin 30, Chanel Classic Flap"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="source">How did you hear about us?</label>
+            <select id="source" name="source" required>
+              <option value="" disabled selected>Select</option>
+              <option value="friend">A friend</option>
+              <option value="social">Social media</option>
+              <option value="press">Article or press</option>
+              <option value="other">Other &mdash; with respect</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="instagram">Instagram handle <span style="color:#B0ACA5; text-transform:none; letter-spacing:0; font-size:11px;">(optional)</span></label>
+            <input type="text" id="instagram" name="instagram" placeholder="@   We'd love to see your style" />
+          </div>
+          <button type="submit" class="form-submit">Submit</button>
+        </form>
+      </div>
+
+      <!-- Thank you -->
+      <div class="thank-you" id="thankYou">
+        <p>We'll be in touch.</p>
+        <p class="sub">You are one of many awaiting access.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Intersection observer for scroll section fade
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.querySelector('.tagline').style.animation = 'fadeInUp 1.2s ease 0.3s forwards';
+          entry.target.querySelector('.cta-button').style.animation = 'fadeInUp 1.2s ease 0.6s forwards';
+          entry.target.querySelector('.queue-counter').style.animation = 'fadeInUp 1.2s ease 0.9s forwards';
+        }
+      });
+    }, { threshold: 0.3 });
+    observer.observe(document.getElementById('scrollSection'));
+
+    // Modal controls
+    function openModal() {
+      document.getElementById('modalOverlay').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function closeModalOutside(e) {
+      if (e.target === document.getElementById('modalOverlay')) closeModal();
+    }
+
+    // Form submission
+    async function submitForm(e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = {
+        full_name: formData.get('fullName'),
+        email: formData.get('email'),
+        piece: formData.get('piece'),
+        source: formData.get('source'),
+        instagram: formData.get('instagram')
+      };
+
+      // Try to submit to backend API
+      try {
+        const response = await fetch('/api/waitlist/join', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (!response.ok) throw new Error('API unavailable');
+      } catch (err) {
+        // Fallback: log locally if backend not available yet
+        console.log('Waitlist submission:', data);
+      }
+
+      // Show thank you
+      document.getElementById('formFields').classList.add('hidden');
+      document.getElementById('thankYou').classList.add('active');
+
+      // Update inquire link to show queue counter
+      document.getElementById('queueCounter').textContent = 'You are one of many awaiting access.';
+      document.getElementById('queueCounter').classList.add('visible');
+    }
+  </script>
+</body>
+</html>

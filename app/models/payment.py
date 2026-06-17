@@ -92,3 +92,19 @@ class WaitlistEntry(Base):
 
     def __repr__(self):
         return f"<WaitlistEntry {self.user_id} -> {self.bag_id}>"
+
+
+class WaitlistInquiry(Base):
+    """Pre-registration inquiries from the landing page waitlist form (no auth required)."""
+    __tablename__ = "waitlist_inquiries"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    full_name = Column(String(255), nullable=False)
+    email = Column(String(255), nullable=False, index=True)
+    piece = Column(Text, nullable=True)  # Which bag they're looking for
+    source = Column(String(100), nullable=True)  # How they heard about us
+    instagram = Column(String(255), nullable=True)  # Instagram handle
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<WaitlistInquiry {self.email}>"

@@ -71,3 +71,17 @@ class WaitlistListResponse(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+class WaitlistJoinRequest(BaseModel):
+    """Public waitlist inquiry from the landing page (no auth required)."""
+    full_name: str = Field(..., min_length=1, max_length=255)
+    email: str = Field(..., max_length=255)
+    piece: Optional[str] = Field(None, max_length=1000)
+    source: Optional[str] = Field(None, max_length=100)
+    instagram: Optional[str] = Field(None, max_length=255)
+
+
+class WaitlistJoinResponse(BaseModel):
+    id: str
+    message: str = "You've been added to the waitlist. We'll be in touch."

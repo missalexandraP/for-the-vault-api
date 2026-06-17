@@ -6,6 +6,7 @@ FastAPI application serving the backend for the luxury handbag rental platform.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Request
+from fastapi.staticfiles import StaticFiles
 from app.config import settings
 from app.database import engine, Base
 from app.services.stripe_service import StripeService
@@ -20,6 +21,7 @@ from app.routers import waitlist as waitlist_router_mod
 from app.routers import admin as admin_router_mod
 from app.routers import webhooks as webhooks_router_mod
 from app.routers import inventory as inventory_router_mod
+from app.routers import public as public_router_mod
 
 # Import models so they register with SQLAlchemy metadata
 import app.models.user  # noqa: F401
@@ -65,7 +67,8 @@ def create_application() -> FastAPI:
     # Initialize Stripe
     StripeService.initialize()
 
-    # Register routers
+    # Register routers — public router first so root route is registered
+    app.include_router(public_router_mod.router)
     app.include_router(auth_router_mod.router)
     app.include_router(users_router_mod.router)
     app.include_router(inventory_router_mod.router)
@@ -74,6 +77,12 @@ def create_application() -> FastAPI:
     app.include_router(waitlist_router_mod.router)
     app.include_router(webhooks_router_mod.router)
     app.include_router(admin_router_mod.router)
+
+    # Mount static files for any additional assets (images, etc.)
+    try:
+        app.mount("/static", StaticFiles(directory="app/static"), name="static")
+    except Exception:
+        pass  # Static directory may not exist yet
 
     # Health check
     @app.get("/health", tags=["System"])
