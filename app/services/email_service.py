@@ -153,6 +153,50 @@ RETURN_REMINDER_TEMPLATE = """
 </html>
 """
 
+WAITLIST_CONFIRMATION_TEMPLATE = """
+<html>
+<body style="font-family: 'Playfair Display', Georgia, serif; color: #1A1A1A; background: #F9F6F0; padding: 40px;">
+    <div style="max-width: 600px; margin: 0 auto; background: #FFFFFF; border-radius: 8px; overflow: hidden;">
+        <div style="background: #1A1A1A; padding: 30px; text-align: center;">
+            <h1 style="color: #D4AF37; margin: 0; font-size: 24px;">The Vault</h1>
+            <p style="color: #F9F6F0; margin: 5px 0 0; font-size: 14px;">Luxury Handbag Rentals</p>
+        </div>
+        <div style="padding: 40px 30px;">
+            <h2 style="color: #1A1A1A; font-size: 22px;">You're on the List</h2>
+            <p style="color: #707070; line-height: 1.6; font-size: 15px;">Dear $name,</p>
+            <p style="color: #707070; line-height: 1.6; font-size: 15px;">
+                Thank you for joining The Vault waitlist. You are one of many awaiting access
+                to the world's most extraordinary collection of designer handbags.
+            </p>
+            <div style="background: #F9F6F0; padding: 20px; border-radius: 6px; margin: 20px 0; text-align: center;">
+                <p style="margin: 0; color: #707070; font-size: 13px;">Your position in the queue</p>
+                <p style="margin: 5px 0 0; font-size: 36px; color: #D4AF37; font-weight: bold;">#$queue_position</p>
+            </div>
+            <div style="background: #F9F6F0; padding: 20px; border-radius: 6px; margin: 20px 0;">
+                <p style="margin: 0; color: #1A1A1A; font-size: 14px;">
+                    <strong>Your Referral Code:</strong><br/>
+                    <span style="font-size: 20px; color: #D4AF37; letter-spacing: 3px;">$referral_code</span>
+                </p>
+                <p style="margin: 10px 0 0; color: #707070; font-size: 13px;">
+                    Share this code with friends — they'll receive priority access, and you'll
+                    move up the waitlist when they join.
+                </p>
+            </div>
+            <p style="color: #707070; line-height: 1.6; font-size: 15px;">
+                We'll notify you as soon as your most-wanted pieces become available.
+            </p>
+        </div>
+        <div style="background: #1A1A1A; padding: 20px; text-align: center;">
+            <p style="color: #707070; font-size: 12px; margin: 0;">
+                The Vault — Luxury Handbag Rentals<br/>
+                <span style="color: #D4AF37;">Access the Extraordinary.</span>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
 
 class EmailService:
     """Transactional email service with HTML templates and SMTP delivery."""
@@ -279,5 +323,20 @@ class EmailService:
             name=name,
             bag_name=bag_name,
             return_date=return_date,
+        )
+        return EmailService.send_email(to_email, subject, html, name)
+
+    @staticmethod
+    def send_waitlist_confirmation(
+        to_email: str, name: str, queue_position: int,
+        referral_code: str = "",
+    ) -> bool:
+        """Send waitlist confirmation with queue position and referral code."""
+        subject = "You're on the Waitlist — The Vault"
+        html = EmailService._render_template(
+            WAITLIST_CONFIRMATION_TEMPLATE,
+            name=name,
+            queue_position=str(queue_position),
+            referral_code=referral_code or "VAULT-XXXX",
         )
         return EmailService.send_email(to_email, subject, html, name)

@@ -3,6 +3,8 @@
 FastAPI application serving the backend for the luxury handbag rental platform.
 """
 
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Request
@@ -22,12 +24,14 @@ from app.routers import admin as admin_router_mod
 from app.routers import webhooks as webhooks_router_mod
 from app.routers import inventory as inventory_router_mod
 from app.routers import public as public_router_mod
+from app.routers import referral as referral_router_mod
 
 # Import models so they register with SQLAlchemy metadata
 import app.models.user  # noqa: F401
 import app.models.inventory  # noqa: F401
 import app.models.booking  # noqa: F401
 import app.models.payment  # noqa: F401
+import app.models.referral  # noqa: F401
 
 
 def create_application() -> FastAPI:
@@ -69,6 +73,7 @@ def create_application() -> FastAPI:
 
     # Register routers — public router first so root route is registered
     app.include_router(public_router_mod.router)
+    app.include_router(referral_router_mod.router)
     app.include_router(auth_router_mod.router)
     app.include_router(users_router_mod.router)
     app.include_router(inventory_router_mod.router)
@@ -102,6 +107,7 @@ app = create_application()
 @app.on_event("startup")
 def on_startup():
     """Create database tables on startup."""
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
     Base.metadata.create_all(bind=engine)
     print(f"✓ {settings.APP_NAME} API is ready")
     print(f"✓ Database tables created")

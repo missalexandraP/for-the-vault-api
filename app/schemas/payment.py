@@ -84,4 +84,37 @@ class WaitlistJoinRequest(BaseModel):
 
 class WaitlistJoinResponse(BaseModel):
     id: str
+    referral_code: Optional[str] = None
+    queue_position: Optional[int] = None
     message: str = "You've been added to the waitlist. We'll be in touch."
+
+
+# --- Referral Schemas ---
+
+
+class ReferralCodeResponse(BaseModel):
+    code: str
+    total_uses: int
+    is_active: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class ReferralClaimRequest(BaseModel):
+    code: str = Field(..., min_length=1, max_length=50)
+    email: str = Field(..., max_length=255)
+    full_name: Optional[str] = Field(None, max_length=255)
+
+
+class ReferralClaimResponse(BaseModel):
+    success: bool
+    message: str
+    referrer_code: Optional[str] = None
+
+
+class ReferralStatsResponse(BaseModel):
+    referral_code: Optional[str] = None
+    total_referrals: int
+    successful_signups: int
